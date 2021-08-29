@@ -290,10 +290,19 @@ void Game::rokade(pair<int, int> prevLocation, pair<int, int> newLocation){
 void Game::passant(pair<int, int> prevLocation, pair<int, int> newLocation) {
 
     SchaakStuk* gespeeldeStuk = getPiece(newLocation.first, newLocation.second);
+    zw kleurSpeler = getPiece(newLocation.first, newLocation.second)->getKleur();
+
+    // verwijder bij elke pion van eigen speler het gevaar om passant gezet te worden (mag enkel direct na de zet uitgevoerd worden)
+    // zo blijft een pion niet en Passant staan
+    for(int i = 0; i <= 7; i++){
+        for(int a = 0; a <= 7; a++){
+            if(bord[i][a] != nullptr && getPiece(i, a)->getKleur() == kleurSpeler && getPiece(i, a)->isPion()){
+                getPiece(i, a)->passant = false;
+            }
+        }
+    }
 
     if(gespeeldeStuk->isPion()){ //enkel pionnen kunnen en passant slaan of geslagen worden
-        zw kleurSpeler = getPiece(newLocation.first, newLocation.second)->getKleur();
-
         // pion dat initiele 2 plaatsen vooruit zet wordt geflagged als passant voor een vijandelijke pion
         if(gespeeldeStuk->isPion() && (prevLocation.first + 2 == newLocation.first || prevLocation.first - 2 == newLocation.first)){
             gespeeldeStuk ->passant=true;
@@ -317,7 +326,6 @@ void Game::passant(pair<int, int> prevLocation, pair<int, int> newLocation) {
             }
         }
     }
-
 }
 
 pair<pair<int, int>, pair<int,int>> Game::AIplayer(zw kleur, bool bestMove){
