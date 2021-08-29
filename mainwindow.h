@@ -1,3 +1,6 @@
+//  Student: Thibault Soumoy
+//  Rolnummer:
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -27,7 +30,7 @@ private:
     zw kleur = wit;
     int zetCounter = 0;
     SchaakStuk* s = nullptr;
-    SchaakStuk* shortStringToChessPiece(string shortString);
+    static SchaakStuk* shortStringToChessPiece(string shortString);
     void displayThread();
     void displayMovesThread();
     void checkSchaakPad(zw kleur);

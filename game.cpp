@@ -1,6 +1,5 @@
-//  Student:
+//  Student: Thibault Soumoy
 //  Rolnummer:
-//  Opmerkingen: (bvb aanpassingen van de opgave)
 //
 
 #include "game.h"
@@ -8,9 +7,7 @@
 Game::Game() {setStartBord();}
 
 Game::~Game() {
-    if(dead != nullptr){
-        delete dead;
-    }
+    delete dead;
     for (int r=0;r<8;r++) {
         for (int k=0;k<8;k++) {
             if(containsPiece(r,k))deletePiece(r, k);
@@ -18,11 +15,11 @@ Game::~Game() {
     }
 }
 
-// Zet het bord klaar; voeg de stukken op de jusite plaats toe
+// Zet het bord klaar; voeg de stukken op de juiste plaats toe
 void Game::setStartBord() {
     /*
      * Zet het bord klaar:
-     * Voegt alle schaakstukken toe op de juiste possitie
+     * Voegt alle schaakstukken toe op de juiste positie
      */
     for(int i =0; i <= 7; i++){
         for(int a =0; a <= 7; a++){
@@ -49,9 +46,12 @@ void Game::setStartBord() {
 }
 
 // Verplaats stuk s naar positie (r,k)
-// Als deze move niet mogelijk is, wordt false teruggegeven
-// en verandert er niets aan het schaakbord.
-// Anders wordt de move uitgevoerd en wordt true teruggegeven
+// (a) Als deze move niet mogelijk is
+//    (1) verandert er niets aan het schaakbord
+//    (2) en wordt false teruggegeven.
+// (b) Anders wordt
+//     (1) de move uitgevoerd
+//     (2) wordt true teruggegeven
 bool Game::move(SchaakStuk* s,pair<int, int> newLocation, bool AIplayer) {
     vector<pair<int,int>> v=s->geldige_zetten(this);
     if(find(v.begin(), v.end(), newLocation) != v.end()){
@@ -67,8 +67,8 @@ bool Game::move(SchaakStuk* s,pair<int, int> newLocation, bool AIplayer) {
             return false;
         }
 
-        if(dead != nullptr) delete dead;    //indien er een schaakstuk is geslagen in vorige zet verwijder deze dan
-        dead = prevSchaakstuk;              //indien er een schaakstuk word geslagen slaag deze dan op om in de volgende zet de verwijderen
+        delete dead;    //indien er een schaakstuk is geslagen in vorige zet verwijder deze dan
+        dead = prevSchaakstuk;              //indien er een schaakstuk word geslagen slaag deze dan op om in de volgende zet te verwijderen
         s->hasMoved();
         checkBijzondereRegels(prevLocation, newLocation, AIplayer);   //check op "en passant", "rokade", “promotie”
         return true;
@@ -94,7 +94,7 @@ bool Game::schaak(zw kleur) {
 
 bool Game::thread(pair<int,int> location, zw kleur) {
     /*
-     * geeft terug of een schaakstuk op locatie in gevar is voor de meegegeven kleur
+     * geeft terug of een schaakstuk op locatie in gevaar is voor de meegegeven kleur
      */
     for(int i = 0; i <= 7; i++){
         for(int a = 0; a <= 7; a++){
@@ -164,9 +164,9 @@ bool Game::containsPiece(int r, int k) const {
     return bord[r][k] != nullptr;
 }
 
-bool Game::containsAnnemie(int r, int k, const SchaakStuk *s) const{
+bool Game::tegenstanderPositie(int r, int k, const SchaakStuk *s) const{
     /*
-     * geeft terug of er een schaakstuk van de andere kleur op deze possitie staat
+     * geeft terug of er een schaakstuk van de andere kleur op deze positie staat
      */
     if(containsPiece(r, k)){
         return getPiece(r,k)->getKleur() != s->getKleur();
@@ -176,7 +176,7 @@ bool Game::containsAnnemie(int r, int k, const SchaakStuk *s) const{
 
 SchaakStuk *Game::getPiece(int r, int k) const {
     /*
-     * geeft het schaakstuk van possitie r, k terug
+     * geeft het schaakstuk van positie r, k terug
      */
     if(containsPiece(r, k)){
         return bord[r][k];
@@ -186,7 +186,7 @@ SchaakStuk *Game::getPiece(int r, int k) const {
 
 void Game::setPiece(int r, int k, SchaakStuk *s) {
     /*
-     * zet schaakstuk s op possitie r,k
+     * zet schaakstuk s op positie r,k
      */
     if(s != nullptr){
         s->updateLocation(r, k);
@@ -196,7 +196,7 @@ void Game::setPiece(int r, int k, SchaakStuk *s) {
 
 bool Game::deletePiece(int r, int k){
     /*
-     * verwijderd het schaakstuk op possitie r, k
+     * verwijderd het schaakstuk op positie r, k
      */
     if(getPiece(r, k) != nullptr){
         delete getPiece(r, k);
@@ -224,59 +224,54 @@ void Game::checkBijzondereRegels(pair<int, int> prevLocation, pair<int, int> new
      * check op de volgende regels:  “en passant”, “rokade” en “promotie”
      */
     rokade(prevLocation, newLocation);
-    passand(prevLocation, newLocation);
+    passant(prevLocation, newLocation);
     promotie(newLocation, AIplayer);
 }
 
 void Game::promotie(pair<int, int> newLocation, bool AIplayer) {
     /*
-     * indien er een pion aan het einde van het bord geraakt zal de gebruiker een melding krijgen met welk schaakstuk dze vervangen mag worden
+     * indien er een pion aan het einde van het bord (rij 0 of 8) geraakt zal de gebruiker een melding krijgen met welk schaakstuk dze vervangen mag worden
+     * Een pion zal nooit zijn eigen achterlijn behalen, dus kleur is niet van belang
      */
-    if(getPiece(newLocation.first, newLocation.second)->toShortString()[0] == 'P' && (newLocation.first == 0 || newLocation.first == 7)){
+    SchaakStuk* pion = getPiece(newLocation.first, newLocation.second);
+    zw kleur = getPiece(newLocation.first, newLocation.second)->getKleur();
+
+    if(pion->isPion() && (newLocation.first == 0 || newLocation.first == 7)){
         QMessageBox msgBox;
         msgBox.setWindowTitle("Promotie");
         msgBox.setText(QMessageBox::tr("Kies een schaakstuk voor de pion die de overkant heeft bereikt:"));
 
         if(AIplayer){
-            zw kleur = getPiece(newLocation.first, newLocation.second)->getKleur();
-            delete getPiece(newLocation.first, newLocation.second);
             setPiece(newLocation.first, newLocation.second, new Koningin(kleur));
-            return;
-        }
+        }else{
+            QPushButton *toren = msgBox.addButton(QMessageBox::tr("Toren"), QMessageBox::ActionRole);
+            QPushButton *paard = msgBox.addButton(QMessageBox::tr("Paard"), QMessageBox::ActionRole);
+            QPushButton *loper = msgBox.addButton(QMessageBox::tr("Loper"), QMessageBox::ActionRole);
+            QPushButton *koningin = msgBox.addButton(QMessageBox::tr("Koningin"), QMessageBox::ActionRole);
+            msgBox.exec();
 
-        QPushButton *toren = msgBox.addButton(QMessageBox::tr("Toren"), QMessageBox::ActionRole);
-        QPushButton *paard = msgBox.addButton(QMessageBox::tr("Paard"), QMessageBox::ActionRole);
-        QPushButton *loper = msgBox.addButton(QMessageBox::tr("Loper"), QMessageBox::ActionRole);
-        QPushButton *koningin = msgBox.addButton(QMessageBox::tr("Koningin"), QMessageBox::ActionRole);
-
-        msgBox.exec();
-
-        if (msgBox.clickedButton() == toren) {
-            zw kleur = getPiece(newLocation.first, newLocation.second)->getKleur();
-            delete getPiece(newLocation.first, newLocation.second);
-            setPiece(newLocation.first, newLocation.second, new Toren(kleur));
+            if (msgBox.clickedButton() == toren) {
+                setPiece(newLocation.first, newLocation.second, new Toren(kleur));
+            }
+            else if(msgBox.clickedButton() == paard){
+                setPiece(newLocation.first, newLocation.second, new Paard(kleur));
+            }
+            else if(msgBox.clickedButton() == loper){
+                setPiece(newLocation.first, newLocation.second, new Loper(kleur));
+            }
+            else if(msgBox.clickedButton() == koningin){
+                setPiece(newLocation.first, newLocation.second, new Koningin(kleur));
+            }else{
+                setPiece(newLocation.first, newLocation.second, new Pion(kleur)); //fallback & geen keuze gemaakt
+            }
         }
-        else if(msgBox.clickedButton() == paard){
-            zw kleur = getPiece(newLocation.first, newLocation.second)->getKleur();
-            delete getPiece(newLocation.first, newLocation.second);
-            setPiece(newLocation.first, newLocation.second, new Paard(kleur));
-        }
-        else if(msgBox.clickedButton() == loper){
-            zw kleur = getPiece(newLocation.first, newLocation.second)->getKleur();
-            delete getPiece(newLocation.first, newLocation.second);
-            setPiece(newLocation.first, newLocation.second, new Loper(kleur));
-        }
-        else if(msgBox.clickedButton() == koningin){
-            zw kleur = getPiece(newLocation.first, newLocation.second)->getKleur();
-            delete getPiece(newLocation.first, newLocation.second);
-            setPiece(newLocation.first, newLocation.second, new Koningin(kleur));
-        }
+        delete getPiece(newLocation.first, newLocation.second);
     }
 }
 
 void Game::rokade(pair<int, int> prevLocation, pair<int, int> newLocation){
     /*
-     *indien de koning 2 plaatsen verplaatst betekend dit dat de gebruiker een rokade aan het uivoeren is
+     *indien de koning 2 plaatsen verplaatst betekend dit dat de gebruiker een rokade aan het uitvoeren is
      * dan zal de toren ook naar de juiste plaats gaan
      */
     if(getPiece(newLocation.first, newLocation.second) != nullptr && getPiece(newLocation.first, newLocation.second)->isKing()){
@@ -291,42 +286,53 @@ void Game::rokade(pair<int, int> prevLocation, pair<int, int> newLocation){
     }
 }
 
-void Game::passand(pair<int, int> prevLocation, pair<int, int> newLocation) {
+// en Passant = move waarbij een pion die zijn initiele 2 stappen zet naast een vijandige pion, door die laatste kan geslagen worden.
+void Game::passant(pair<int, int> prevLocation, pair<int, int> newLocation) {
 
-    //verwijder bij elke pion het gevaar om passant gezet te worden (mag enkel direct na de zet uitgevoert worden)
-    for(int i = 0; i <= 7; i++){
-        for(int a = 0; a <= 7; a++){
-            if(bord[i][a] != nullptr && getPiece(i, a)->getKleur() == getPiece(newLocation.first, newLocation.second)->getKleur()){
-                getPiece(i, a)->passant = false;
+    SchaakStuk* gespeeldeStuk = getPiece(newLocation.first, newLocation.second);
+
+    if(gespeeldeStuk->isPion()){ //enkel pionnen kunnen en passant slaan of geslagen worden
+        zw kleurSpeler = getPiece(newLocation.first, newLocation.second)->getKleur();
+
+        // pion dat initiele 2 plaatsen vooruit zet wordt geflagged als passant voor een vijandelijke pion
+        if(gespeeldeStuk->isPion() && (prevLocation.first + 2 == newLocation.first || prevLocation.first - 2 == newLocation.first)){
+            gespeeldeStuk ->passant=true;
+        }
+
+        //verwijder pion: indien er een passant wordt uitgevoerd door andere pion
+        // (1) en passant risico (= vorige move was een initiele 2 stappen voorwaarts)
+        // (2) andere kleur
+        // (3) nieuwe locatie gespeelde stuk is achter en-passant pion
+        if(zwart == kleurSpeler){
+            SchaakStuk* pRisicoPieceZwart = getPiece(newLocation.first - 1, newLocation.second);
+            if(pRisicoPieceZwart != nullptr && pRisicoPieceZwart->passant && wit == pRisicoPieceZwart->getKleur()){
+                setPiece(pRisicoPieceZwart->getLocation().first, pRisicoPieceZwart->getLocation().second, nullptr);
+                dead = pRisicoPieceZwart;
+            }
+        }else{ // kleurSpeler == wit
+            SchaakStuk* pRisicoPieceWit = getPiece(newLocation.first + 1, newLocation.second);
+            if(pRisicoPieceWit != nullptr && pRisicoPieceWit->passant && zwart == pRisicoPieceWit->getKleur()){
+                setPiece(pRisicoPieceWit->getLocation().first, pRisicoPieceWit->getLocation().second, nullptr);
+                dead = pRisicoPieceWit;
             }
         }
     }
 
-    //Indien het schaakstuk 2 plaatsen vooruit is gegaan is deze in het risico passant gezet te worden
-    if((prevLocation.first + 2 == newLocation.first || prevLocation.first - 2 == newLocation.first) && getPiece(newLocation.first, newLocation.second)->toShortString()[0] == 'P') getPiece(newLocation.first, newLocation.second)->passant=true;
-
-    //verwijder schaakstuk indien er een passant word uitgevoert
-    if((getPiece(newLocation.first - 1, newLocation.second) != nullptr && getPiece(newLocation.first - 1, newLocation.second)->passant == true && getPiece(newLocation.first, newLocation.second)->getKleur() == zwart) || (getPiece(newLocation.first + 1, newLocation.second) != nullptr && getPiece(newLocation.first + 1, newLocation.second)->passant == true && getPiece(newLocation.first, newLocation.second)->getKleur() == wit)){
-        SchaakStuk* s = getPiece(newLocation.first - 1, newLocation.second);
-        if(getPiece(newLocation.first, newLocation.second)->getKleur() == wit) s = getPiece(newLocation.first + 1, newLocation.second);
-
-        setPiece(s->getLocation().first, s->getLocation().second, nullptr);
-        dead = s;
-    }
 }
 
 pair<pair<int, int>, pair<int,int>> Game::AIplayer(zw kleur, bool bestMove){
     /*
      * zal een mogelijke zet terug geven voor de AIplayer
-     * bestMove (true): Niet voledig willekeurig schaakmat > schaak > slagen > random
-     * bestmove (false): voledig willekeurig schaakmat = schaak = slagen = random
+     * bestMove (true): Niet volledig willekeurig schaakmat > schaak > slagen > random
+     * bestmove (false): volledig willekeurig schaakmat = schaak = slagen = random
      */
 
-    //verzamel alle mogelijke possities in p
+    //verzamel alle mogelijke posities in p
     possibleMoves p;
     for(int i = 0; i <= 7; i++){
         for(int a = 0; a <= 7; a++){
-            if(getPiece(i,a) != nullptr && getPiece(i,a)->getKleur() == kleur) p.insert(getAttacPossitions(kleur, getPiece(i,a)));
+            if(getPiece(i,a) != nullptr && getPiece(i,a)->getKleur() == kleur) p.insert(
+                        getAanvalPosities(kleur, getPiece(i, a)));
         }
     }
 
@@ -347,22 +353,33 @@ pair<pair<int, int>, pair<int,int>> Game::AIplayer(zw kleur, bool bestMove){
     return pair<pair<int,int>, pair<int,int>>(randomZet.first->getLocation(), randomZet.second);
 }
 
-possibleMoves Game::getAttacPossitions(zw kleur, SchaakStuk* s){
+possibleMoves Game::getAanvalPosities(zw kleur, SchaakStuk* s){
     /*
-     * geeft de mogelijke possities van elk schaakstuk
+     * geeft de mogelijke posities van elk schaakstuk
      */
-    possibleMoves p;
-    if(s->getKleur() == kleur){
+    possibleMoves moves;
+    zw mijnKleur = s->getKleur();
+    if(mijnKleur == kleur){
         vector<pair<int,int>> geldigeZetten = s->geldige_zetten(this);
         for(vector<pair<int,int>>::iterator it = geldigeZetten.begin(); it != geldigeZetten.end(); it++){
-            if((it->first == s->getLocation().first && it->second == s->getLocation().second) || mogelijkSchaak(it->first, it->second, s, s->getKleur())) continue;
-            else if(mogelijkSchaakMat(it->first, it->second, s, (zw)(!(bool)(s->getKleur())))) p.insertPossibleSchaakmat(s, pair<int,int>(it->first, it->second));
-            else if(mogelijkSchaak(it->first, it->second, s, (zw)(!(bool)(s->getKleur())))) p.insertPossibleSchaak(s, pair<int,int>(it->first, it->second));
-            else if(containsAnnemie(it->first, it->second, s)) p.insertPossibleAttacs(s, pair<int,int>(it->first, it->second));
-            else p.insertPossibleSchaakStuk(s, pair<int,int>(it->first, it->second));
+            if((it->first == s->getLocation().first && it->second == s->getLocation().second) || mogelijkSchaak(it->first, it->second, s, s->getKleur())){
+                continue;
+            }
+            else if(mogelijkSchaakMat(it->first, it->second, s, mijnKleur)){
+                moves.insertPossibleSchaakmat(s, pair<int,int>(it->first, it->second));
+            }
+            else if(mogelijkSchaak(it->first, it->second, s, mijnKleur)){
+                moves.insertPossibleSchaak(s, pair<int,int>(it->first, it->second));
+            }
+            else if(tegenstanderPositie(it->first, it->second, s)) {
+                moves.insertPossibleAttacks(s, pair<int, int>(it->first, it->second));
+            }
+            else {
+                moves.insertPossibleSchaakStuk(s, pair<int,int>(it->first, it->second));
+            }
         }
     }
-    return p;
+    return moves;
 }
 
 bool Game::mogelijkSchaak(int r, int k, SchaakStuk *s, zw kleur){

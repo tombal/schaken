@@ -1,6 +1,5 @@
-//  Student:
+//  Student: Thibault Soumoy
 //  Rolnummer:
-//  Opmerkingen: (bvb aanpassingen van de opgave)
 //
 
 #include "SchaakStuk.h"
@@ -18,17 +17,17 @@ vector<pair<int, int>> Pion::geldige_zetten(const Game* g) const{
         addTwo = -2;
     }
     if(!g->containsPiece((r + addOne), k) && r + addOne <= 7 && r + addOne >= 0){
-        zetten.push_back(make_pair(r + addOne, k));
+        zetten.emplace_back(r + addOne, k);
     }
-    if(!g->containsPiece((r + addTwo), k) && !g->containsPiece((r + addOne), k) && ((r == 1 && addTwo > 0) || (r == 6 && addTwo < 0))) zetten.push_back(make_pair(r + addTwo, k));
+    if(!g->containsPiece((r + addTwo), k) && !g->containsPiece((r + addOne), k) && ((r == 1 && addTwo > 0) || (r == 6 && addTwo < 0))) zetten.emplace_back(r + addTwo, k);
 
     //voor een schaakstuk te slaan
-    if(g->containsAnnemie(r + addOne, k + addOne, this) && (r + addOne <= 7 && r + addOne >= 0) && (k + addOne <= 7 && k + addOne >= 0)) zetten.push_back(make_pair(r + addOne, k + addOne));
-    if(g->containsAnnemie(r + addOne, k - addOne, this) && (r + addOne <= 7 && r + addOne >= 0) && (k - addOne <= 7 && k - addOne >= 0)) zetten.push_back(make_pair(r + addOne, k - addOne));
+    if(g->tegenstanderPositie(r + addOne, k + addOne, this) && (r + addOne <= 7 && r + addOne >= 0) && (k + addOne <= 7 && k + addOne >= 0)) zetten.emplace_back(r + addOne, k + addOne);
+    if(g->tegenstanderPositie(r + addOne, k - addOne, this) && (r + addOne <= 7 && r + addOne >= 0) && (k - addOne <= 7 && k - addOne >= 0)) zetten.emplace_back(r + addOne, k - addOne);
 
     //voor passant
-    if(g->getPiece(r, k  + addOne) != nullptr && g->containsAnnemie(r, k  + addOne, this) && g->getPiece(r, k  + addOne)->toShortString()[0] == 'P' && g->getPiece(r, k  + addOne)->passant) zetten.push_back(make_pair(r + addOne, k + addOne));//passant
-    if(g->getPiece(r, k  - addOne) != nullptr && g->containsAnnemie(r, k - addOne, this) && g->getPiece(r, k - addOne)->toShortString()[0] == 'P' && g->getPiece(r, k  - addOne)->passant) zetten.push_back(make_pair(r + addOne, k - addOne));//passant
+    if(g->getPiece(r, k  + addOne) != nullptr && g->tegenstanderPositie(r, k + addOne, this) && g->getPiece(r, k + addOne)->toShortString()[0] == 'P' && g->getPiece(r, k + addOne)->passant) zetten.emplace_back(r + addOne, k + addOne);//passant
+    if(g->getPiece(r, k  - addOne) != nullptr && g->tegenstanderPositie(r, k - addOne, this) && g->getPiece(r, k - addOne)->toShortString()[0] == 'P' && g->getPiece(r, k - addOne)->passant) zetten.emplace_back(r + addOne, k - addOne);//passant
 
     return zetten;
 }
@@ -41,8 +40,8 @@ vector<pair<int, int>> Pion::aanval_zetten(const Game* g) const{
     int addOne = 1;
     if(getKleur() == wit) addOne = -1;
 
-    if((r + addOne <= 7 && r + addOne >= 0) && (k + addOne <= 7 && k + addOne >= 0)) zetten.push_back(make_pair(r + addOne, k + addOne));
-    if((r + addOne <= 7 && r + addOne >= 0) && (k - addOne <= 7 && k - addOne >= 0)) zetten.push_back(make_pair(r + addOne, k - addOne));
+    if((r + addOne <= 7 && r + addOne >= 0) && (k + addOne <= 7 && k + addOne >= 0)) zetten.emplace_back(r + addOne, k + addOne);
+    if((r + addOne <= 7 && r + addOne >= 0) && (k - addOne <= 7 && k - addOne >= 0)) zetten.emplace_back(r + addOne, k - addOne);
     return zetten;
 }
 
@@ -66,20 +65,20 @@ vector<pair<int, int>> Toren::geldige_zetten(const Game* g) const{
      */
     vector<pair<int, int>> zetten;
     for(int i = r + 1; i <= 7; i++){
-        if((g->containsAnnemie(i, k, this) || !g->containsPiece(i, k)) && i != r) zetten.push_back(make_pair(i, k));
+        if((g->tegenstanderPositie(i, k, this) || !g->containsPiece(i, k)) && i != r) zetten.emplace_back(i, k);
         if(g->containsPiece(i, k) && i != r) break;
     }
     for(int i = r - 1; i >= 0; i--){
-        if((g->containsAnnemie(i, k, this) || !g->containsPiece(i, k)) && i != r) zetten.push_back(make_pair(i, k));
+        if((g->tegenstanderPositie(i, k, this) || !g->containsPiece(i, k)) && i != r) zetten.emplace_back(i, k);
         if(g->containsPiece(i, k) && i != r) break;
     }
 
     for(int i = k + 1; i <= 7; i++){
-        if((g->containsAnnemie(r, i, this) || !g->containsPiece(r, i)) && i != k) zetten.push_back(make_pair(r, i));
+        if((g->tegenstanderPositie(r, i, this) || !g->containsPiece(r, i)) && i != k) zetten.emplace_back(r, i);
         if(g->containsPiece(r, i) && i != k) break;
     }
     for(int i = k - 1; i >= 0; i--){
-        if((g->containsAnnemie(r, i, this) || !g->containsPiece(r, i)) && i != k) zetten.push_back(make_pair(r, i));
+        if((g->tegenstanderPositie(r, i, this) || !g->containsPiece(r, i)) && i != k) zetten.emplace_back(r, i);
         if(g->containsPiece(r, i) && i != k) break;
     }
 
@@ -101,9 +100,9 @@ vector<pair<int, int>> Loper::geldige_zetten(const Game* g) const{
 
     int i = r;
     int a = k;
-    //diagnaal naar onder rechts
+    //diagonaal naar onder rechts
     while(i <= 7 && a <= 7){
-        if((g->containsAnnemie(i, a, this) || !g->containsPiece(i, a))) zetten.push_back(make_pair(i, a));
+        if((g->tegenstanderPositie(i, a, this) || !g->containsPiece(i, a))) zetten.emplace_back(i, a);
         if(g->containsPiece(i, a) && i != r && a != k) break;
         a++;
         i++;
@@ -111,9 +110,9 @@ vector<pair<int, int>> Loper::geldige_zetten(const Game* g) const{
 
     i = r;
     a = k;
-    //diagnaal naar boven links
+    //diagonaal naar boven links
     while(i >= 0 && a >= 0){
-        if((g->containsAnnemie(i, a, this) || !g->containsPiece(i, a))) zetten.push_back(make_pair(i, a));
+        if((g->tegenstanderPositie(i, a, this) || !g->containsPiece(i, a))) zetten.emplace_back(i, a);
         if(g->containsPiece(i, a) && i != r && a != k) break;
         a--;
         i--;
@@ -121,9 +120,9 @@ vector<pair<int, int>> Loper::geldige_zetten(const Game* g) const{
 
     i = r;
     a = k;
-    //diagnaal naar onder links
+    //diagonaal naar onder links
     while(i <= 7 && a>= 0){
-        if((g->containsAnnemie(i, a, this) || !g->containsPiece(i, a))) zetten.push_back(make_pair(i, a));
+        if((g->tegenstanderPositie(i, a, this) || !g->containsPiece(i, a))) zetten.emplace_back(i, a);
         if(g->containsPiece(i, a) && i != r && a != k) break;
         a--;
         i++;
@@ -131,9 +130,9 @@ vector<pair<int, int>> Loper::geldige_zetten(const Game* g) const{
 
     i = r;
     a = k;
-    //diagnaal naar boven recht
+    //diagonaal naar boven recht
     while(i >= 0 && a <= 7){
-        if((g->containsAnnemie(i, a, this) || !g->containsPiece(i, a))) zetten.push_back(make_pair(i, a));
+        if((g->tegenstanderPositie(i, a, this) || !g->containsPiece(i, a))) zetten.emplace_back(i, a);
         if(g->containsPiece(i, a) && i != r && a != k) break;
         a++;
         i--;
@@ -156,7 +155,7 @@ vector<pair<int, int>> Paard::geldige_zetten(const Game* g) const{
 
     for(int i = -2; i <= 2; i++){
         for(int a = -2; a <= 2; a++){
-            if((g->containsAnnemie(r + i, k + a, this) || !g->containsPiece(r + i, k + a)) && (r + i <= 7 && k + a <= 7 && k + a >= 0 && r + i >= 0 && abs(i) != abs(a) && i != 0 && a != 0)) zetten.push_back(make_pair(r + i, k + a));
+            if((g->tegenstanderPositie(r + i, k + a, this) || !g->containsPiece(r + i, k + a)) && (r + i <= 7 && k + a <= 7 && k + a >= 0 && r + i >= 0 && abs(i) != abs(a) && i != 0 && a != 0)) zetten.emplace_back(r + i, k + a);
         }
     }
     return zetten;
@@ -177,7 +176,7 @@ vector<pair<int, int>> Koning::geldige_zetten(const Game* g) const{
 
     for(int i = -1; i <= 1; i++){
         for(int a = -1; a <= 1; a++){
-            if((g->containsAnnemie(r + i, k + a, this) || !g->containsPiece(r + i, k + a)) && (r + i >= 0 && r + i <= 7 && k + a >= 0 && k + a <= 7)) zetten.push_back(make_pair(r + i, k + a));
+            if((g->tegenstanderPositie(r + i, k + a, this) || !g->containsPiece(r + i, k + a)) && (r + i >= 0 && r + i <= 7 && k + a >= 0 && k + a <= 7)) zetten.emplace_back(r + i, k + a);
         }
     }
 
@@ -188,7 +187,7 @@ vector<pair<int, int>> Koning::geldige_zetten(const Game* g) const{
             if(g->containsPiece(r, k + i)) allowRokade = false;
         }
         if(allowRokade){
-            zetten.push_back(make_pair(r, k + 2));
+            zetten.emplace_back(r, k + 2);
         }
     }
 
@@ -199,7 +198,7 @@ vector<pair<int, int>> Koning::geldige_zetten(const Game* g) const{
             if(g->containsPiece(r, k - i)) allowRokade = false;
         }
         if(allowRokade){
-            zetten.push_back(make_pair(r, k - 2));
+            zetten.emplace_back(r, k - 2);
         }
     }
 

@@ -1,3 +1,6 @@
+//  Student: Thibault Soumoy
+//  Rolnummer:
+
 #include "mainwindow.h"
 #include <QMessageBox>
 #include <QtWidgets>
@@ -45,7 +48,7 @@ void MainWindow::clicked(int r, int k) {
 void MainWindow::newGame()
 {
     /*
-     * creert een nieuwe Game:
+     * creëert een nieuwe Game:
      * (1) Verwijder alle schaakstukken
      * (2) zet nieuwe stukken op startpositie.
      */
@@ -69,7 +72,7 @@ void MainWindow::newGame()
 
 void MainWindow::save() {
     /*
-     * functie die het huidige schaakbord omzet naar een bestand
+     * functie die het huidige schaakbord omzet naar een lokaal bestand
      */
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     tr("Save game"), "",
@@ -98,7 +101,7 @@ void MainWindow::save() {
                 }
             }
         }
-        //slaag op het einde van het bestand op welke kleur er aan de beurd is
+        //slaag op het einde van het bestand op welke kleur er aan de beurt is
         out << QString::fromStdString(to_string((int)kleur));
         file.close();
     }
@@ -106,7 +109,9 @@ void MainWindow::save() {
 
 void MainWindow::open() {
     /*
-     * functie die een schaakbestand inlaad
+     * Functie die een schaakbestand (*.chs) inlaadt en text representatie is van:
+     * (a) alle schaakstukken op het bord & hun positie.
+     * (b) kleur aan de beurt
      */
     QString fileName = QFileDialog::getOpenFileName(this,
                                                     tr("Load game"), "",
@@ -124,8 +129,7 @@ void MainWindow::open() {
         try {
             scene->removeAllMarking();
             QDataStream in(&file);
-            QString debugstring;
-            //verwijderd elk bestaand schaakstuk en zet de ShortString van het bestand om naar een schaakstuk
+            //verwijder elk bestaand schaakstuk en zet de ShortString van het bestand om naar een schaakstuk
             for (int r=0;r<8;r++) {
                 for (int k=0;k<8;k++) {
                     QString piece;
@@ -134,11 +138,11 @@ void MainWindow::open() {
                     g.setPiece(r , k, shortStringToChessPiece(piece.toStdString()));
 
                     if (in.status()!=QDataStream::Ok) {
-                        throw QString("Error reading file "+fileName);
+                        throw QString("Error reading file %1").arg(fileName);
                     }
                 }
             }
-            //het laatste teken is de kleur van de speler die aan de beurd is
+            //het laatste teken is de kleur van de speler die aan de beurt is
             QString color;
             in >> color;
 
@@ -146,7 +150,7 @@ void MainWindow::open() {
                 kleur = (zw)(color.toInt());
             }
             else{
-                throw QString("Error reading file " + fileName);
+                throw QString("Error reading file %1").arg(fileName);
             }
 
             update();
@@ -160,7 +164,7 @@ void MainWindow::open() {
 
 SchaakStuk* MainWindow::shortStringToChessPiece(string shortString) {
     /*
-     * Functie voor het omzetten van een schortString([letter][(int)kleur]) naar een schaakstuk
+     * Vertaal-Functie voor het omzetten van een schortString([letter][(int)kleur]) text-representatie naar een schaakstuk
      */
     char piece = shortString[0];
     zw color = zwart;
@@ -183,13 +187,13 @@ SchaakStuk* MainWindow::shortStringToChessPiece(string shortString) {
         case '.':
             return nullptr;
         default:
-            throw QString("Symbool niet herkent: "+ piece);
+            throw QString("Symbool niet herkent: %1").arg(piece);
     }
 }
 
 void MainWindow::undo() {
     /*
-     * zal de gebruiker zijn zet terug zetten
+     * zet de gebruiker zijn zet terug zetten
      */
     if(undoB){
         redoG = g;                      //slaagt de huidige game op in redoG
@@ -200,12 +204,12 @@ void MainWindow::undo() {
 
         zetCounter--;                   //zet de zetCounter 1 terug
 
-        //update allle schaakstukken zodat ze de juiste possitie hebben
-        //en zet de zetCounter van de schaakstukken juist
+        //(1) update alle schaakstukken zodat ze de juiste positie hebben
+        //(2) zet de zetCounter van de schaakstukken juist
         for (int r=0;r<8;r++) {
             for (int k=0;k<8;k++) {
                 if(g.getPiece(r, k) != nullptr) g.getPiece(r, k)->updateLocation(r,k);
-                if(redoG.getPiece(r,k) != g.getPiece(r,k) && g.getPiece(r,k) != nullptr && g.getPiece(r,k)->moveCount > 0) g.getPiece(r,k)->moveCount -= 1; //zet het aantal zetten van het schaakstuk teurg
+                if(redoG.getPiece(r,k) != g.getPiece(r,k) && g.getPiece(r,k) != nullptr && g.getPiece(r,k)->moveCount > 0) g.getPiece(r,k)->moveCount -= 1; //zet het aantal zetten van het schaakstuk terug
 
             }
         }
@@ -232,8 +236,14 @@ void MainWindow::redo() {
         zetCounter++;
         for (int r = 0; r < 8; r++) {
             for (int k = 0; k < 8; k++) {
-                if (g.getPiece(r, k) != nullptr) g.getPiece(r, k)->updateLocation(r, k);
-                if(undoG.getPiece(r,k) != g.getPiece(r,k) && g.getPiece(r,k) != nullptr && g.getPiece(r,k)->moveCount > 0) g.getPiece(r,k)->moveCount += 1; //zet het aantal zetten van het schaakstuk teurg
+                bool heeftPieceOpPositie = g.getPiece(r,k) != nullptr;
+                if (heeftPieceOpPositie) {
+                    g.getPiece(r, k)->updateLocation(r, k);
+                }
+                bool pieceHeeftBewogen = undoG.getPiece(r,k) != g.getPiece(r,k);
+                if(pieceHeeftBewogen && heeftPieceOpPositie && g.getPiece(r,k)->moveCount > 0){
+                    g.getPiece(r,k)->moveCount += 1; //zet het aantal zetten van het schaakstuk terug
+                }
             }
         }
         update();
@@ -260,9 +270,9 @@ void MainWindow::update() {
     scene->clearBoard();
     for(int i =0; i <= 7; i++){
         for(int a =0; a <= 7; a++){
-           if(g.containsPiece(i, a)){
-               scene->setItem(i, a, g.getPiece(i, a)->piece());
-           }
+            if(g.containsPiece(i, a)){
+                scene->setItem(i, a, g.getPiece(i, a)->piece());
+            }
         }
     }
 }
@@ -377,14 +387,14 @@ void MainWindow::on_actionExit_triggered() {
 
 void MainWindow::selectSchaakstuk(int r, int k) {
     /*
-     * Al de gebruiker op een veld klikt (r,k) en er staat een schaakstuk op dan zullen we dit schaakstuk opslaan
+     * Als de gebruiker op een veld klikt (r,k) en er staat een schaakstuk op dan zullen we dit schaakstuk opslaan
      * zodat we deze bij de volgende klik kunnen verplaatsen
      */
-    QMessageBox box1;
+    QMessageBox popUp;
     s = g.getPiece(r, k);
     if(s == nullptr){
-        box1.setText(QString("Selecteer een schaakstuk"));
-        box1.exec();
+        popUp.setText(QString("Selecteer een schaakstuk"));
+        popUp.exec();
     }
     else if(s->getKleur() == kleur){
         scene->removeAllMarking();
@@ -393,18 +403,18 @@ void MainWindow::selectSchaakstuk(int r, int k) {
         zetCounter++;
     }
     else{
-        box1.setText(QString("Selecteer je eigen kleur!"));
-        box1.exec();
+        popUp.setText(QString("Selecteer je eigen kleur!"));
+        popUp.exec();
     }
 }
 
 void MainWindow::zetSchaakstuk(int r, int k) {
     /*
-     * Als de gebruiker op een veld klikt (r,k), en het geselecteerde schaakstuk kan naar daar verplaatsen
+     * Als (1) de gebruiker op een veld klikt (r,k), en (2) het geselecteerde schaakstuk kan naar daar verplaatsen
      * Dan zal het schaakstuk naar (r,k) verplaatst worden
      */
     undoG = g;
-    QMessageBox box1;
+    QMessageBox popUp;
 
     if(g.move(s,pair<int,int>(r,k))){
         //verzet het schaakstuk
@@ -422,8 +432,8 @@ void MainWindow::zetSchaakstuk(int r, int k) {
 
         if(g.containsPiece(r, k) && g.getPiece(r, k)->getKleur() == kleur) selectSchaakstuk(r, k);
         else{
-            box1.setText(QString("Ongeldige zet! \nprobeer opnieuw"));
-            box1.exec();
+            popUp.setText(QString("Ongeldige zet! \nprobeer opnieuw"));
+            popUp.exec();
             scene->removeAllMarking();
         }
 
@@ -438,19 +448,19 @@ void MainWindow::zetSchaakstuk(int r, int k) {
 
 void MainWindow::autoPlayer() {
     /*
-     * Functie die een willikeurige zet uitvoert voor de AI speler
-     * (Niet voledig willekeurig schaakmat > schaak > slagen > random)
+     * Functie die een willekeurige zet uitvoert voor de AI speler
+     * (Niet volledig willekeurig schaakmat > schaak > slagen > random)
      */
     scene->removeAllMarking();
-    QMessageBox box1;
-    pair<pair<int,int>, pair<int,int>> oldNewLocation = g.AIplayer(kleur);// geeft de zet terug naar waar de AI player zich zal verplaaten
+    QMessageBox popUp;
+    pair<pair<int,int>, pair<int,int>> oldNewLocation = g.AIplayer(kleur);// geeft de zet terug naar waar de AI player zich zal verplaatsen
 
     //indien oldNewLocation = ((-1,-1)(-1,-1) betekend dit dat er geen mogelijke zetten meer zijn voor de AI player
     if(oldNewLocation != pair<pair<int,int>, pair<int,int>>(pair<int,int>(-1,-1),pair<int,int>(-1,-1))){
 
         //zet de AI player naar de gegeven plaats, indien dit niet mag (zelf schaak) zoekt hij een nieuwe plaats
         while(!g.move(g.getPiece(oldNewLocation.first.first,oldNewLocation.first.second), oldNewLocation.second, true) && !g.schaakmat(kleur)){
-           oldNewLocation = g.AIplayer(kleur, false);
+            oldNewLocation = g.AIplayer(kleur, false);
         }
         update();
         zetCounter+=2;
@@ -459,18 +469,18 @@ void MainWindow::autoPlayer() {
         if(display_kills->isChecked()) displayThread();
     }
     else if(g.schaak(kleur)){
-        box1.setText(QString("U hebt gewonnen!"));
-        box1.exec();
+        popUp.setText(QString("U hebt gewonnen!"));
+        popUp.exec();
     }
     else{
-        box1.setText(QString("Gelijke stand (pad)"));
-        box1.exec();
+        popUp.setText(QString("Gelijke stand (pad)"));
+        popUp.exec();
     }
 }
 
 void MainWindow::displayThread() {
     /*
-     * maakt alle schaakstuken die geslagen kunnen worden rood
+     * maakt alle schaakstukken die geslagen kunnen worden rood
      */
     for(int i = 0; i <= 7; i++){
         for(int a = 0; a <= 7; a++){
@@ -481,38 +491,44 @@ void MainWindow::displayThread() {
 
 void MainWindow::displayMovesThread() {
     /*
-     * r, k (int) de possitie van het te verplaatsen schaakstuk
+     * r, k (int) de positie van het te verplaatsen schaakstuk
      * zal voor het meegegeven schaakstuk de plaatsen tonen naar waar het verplaatst mag worden en of er daar gevaar is
      */
-    vector<pair<int,int>> v=s->geldige_zetten(&g);
-    for(vector<pair<int, int>>::iterator it = v.begin(); it != v.end(); it++){
-        int r = s->getLocation().first;
-        int k = s->getLocation().second;
-        SchaakStuk* prevSchaakstuk = g.getPiece(it->first, it->second);
-        g.setPiece(it->first, it->second, s);
+    vector<pair<int,int>> geldigeZetten=s->geldige_zetten(&g);
+    // range-based for loop
+    for(auto & iterator : geldigeZetten){
+        int rPiece = s->getLocation().first;
+        int kPiece = s->getLocation().second;
+        int rValidMove = iterator.first;
+        int kValidMove = iterator.second;
 
-        if(display_moves->isChecked()) scene->setTileFocus(it->first,it->second,true);
-        if(g.thread(pair<int, int>(it->first,it->second), s->getKleur()) && display_threats->isChecked()) scene->setTileThreat(it->first,it->second,true);
+        SchaakStuk* prevSchaakstuk = g.getPiece(rValidMove, kValidMove);
+        g.setPiece(rValidMove, kValidMove, s);
 
-        g.setPiece(r, k, s);
-        g.setPiece(it->first , it->second, prevSchaakstuk);
+        if(display_moves->isChecked()) scene->setTileFocus(rValidMove, kValidMove, true);
+        if(g.thread(pair<int, int>(rValidMove, kValidMove), s->getKleur()) && display_threats->isChecked()){
+            scene->setTileThreat(rValidMove, kValidMove, true);
+        }
+
+        g.setPiece(rPiece, kPiece, s);
+        g.setPiece(rValidMove , kValidMove, prevSchaakstuk);
     }
 }
 
-void MainWindow::checkSchaakPad(zw kleur) {
+void MainWindow::checkSchaakPad(zw mijnKleur) {
     /*
      * Check of een meegegeven kleur schaak, schaakmat, of pad staat
      * indien dit het geval is zal er een melding gegeven worden
      */
-    QMessageBox box1;
-    if(g.schaak(kleur)){
-        box1.setText(QString("Schaak!"));
-        if(g.schaakmat(kleur)) box1.setText(QString("Schaakmat!"));
-        box1.exec();
+    QMessageBox popup;
+    if(g.schaak(mijnKleur)){
+        popup.setText(QString("Schaak!"));
+        if(g.schaakmat(mijnKleur)) popup.setText(QString("Schaakmat!"));
+        popup.exec();
     }
-    else if(g.pat(kleur)){
-        box1.setText(QString("Pad!"));
-        box1.exec();
+    else if(g.pat(mijnKleur)){
+        popup.setText(QString("Pad!"));
+        popup.exec();
     }
 }
 
@@ -521,7 +537,7 @@ void MainWindow::AIChange() {
      * Functie voor het inschakelen van de AI
      * Extra: Zal Undo en Redo disable
      */
-    QMessageBox box1;
+    QMessageBox popUp;
     againsPc = !againsPc;
     againstAi->setChecked(againsPc);
     if(againsPc){
