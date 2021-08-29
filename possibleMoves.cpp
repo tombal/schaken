@@ -9,7 +9,7 @@ vector<pair<SchaakStuk*, pair<int, int>>> const possibleMoves::getPossibleAttacs
     /*
      * geeft een vector van pairs met locatie's voor andere schaakstukken te slaan
      */
-    return attac;
+    return aanval;
 }
 
 vector<pair<SchaakStuk*, pair<int, int>>> const possibleMoves::getPossibleSchaak() const{
@@ -38,7 +38,7 @@ bool possibleMoves::insertPossibleAttacks(SchaakStuk *s, pair<int, int> m) {
      * insert een schaakstuk met de mogelijke locatie om een ander schaakstuk te slaan
      */
     if(s != nullptr){
-        attac.emplace_back(s, m);
+        aanval.emplace_back(s, m);
         return true;
     }
     return false;
@@ -83,7 +83,7 @@ void possibleMoves::insert(possibleMoves p) {
      */
     schaakmat.insert(schaakmat.end(), p.schaakmat.begin(), p.schaakmat.end());
     schaak.insert(schaak.end(), p.schaak.begin(), p.schaak.end());
-    attac.insert(attac.end(), p.attac.begin(), p.attac.end());
+    aanval.insert(aanval.end(), p.aanval.begin(), p.aanval.end());
     schaakstuk.insert(schaakstuk.end(), p.schaakstuk.begin(), p.schaakstuk.end());
 }
 
@@ -91,7 +91,7 @@ pair<SchaakStuk *, pair<int, int>> const possibleMoves::getRandomAttac() const{
     /*
      * geeft een random positie om een ander schaakstuk te slaan
      */
-    return getRandom(&attac);
+    return getRandom(&aanval);
 }
 
 pair<SchaakStuk *, pair<int, int>> const possibleMoves::getRandomSchaak() const{
@@ -126,7 +126,7 @@ pair<SchaakStuk *, pair<int, int>> const possibleMoves::getRandomBest() const{
     else if(!schaak.empty()){
         return getRandomSchaak();
     }
-    else if(!attac.empty()){
+    else if(!aanval.empty()){
         return getRandomAttac();
     }
     else{
@@ -153,7 +153,7 @@ pair<SchaakStuk *, pair<int, int>> const possibleMoves::getRandomMove() const{
     vector<pair<SchaakStuk*, pair<int, int>>> all;
     all = schaakmat;
     all.insert(all.end(), schaak.begin(), schaak.end());
-    all.insert(all.end(), attac.begin(), attac.end());
+    all.insert(all.end(), aanval.begin(), aanval.end());
     all.insert(all.end(), schaakstuk.begin(), schaakstuk.end());
     return getRandom(&all);
 }
@@ -162,6 +162,6 @@ int const possibleMoves::getMoveCount() {
     /*
      * geeft het aantal opties waar de schaakstukken zich naar kunnen verplaatsen
      */
-    return schaakmat.size() + schaak.size() + attac.size() + schaakstuk.size();
+    return schaakmat.size() + schaak.size() + aanval.size() + schaakstuk.size();
 }
 

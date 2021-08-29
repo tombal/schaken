@@ -33,7 +33,7 @@ public:
 
 private:
     vector<pair<SchaakStuk*, pair<int, int>>> schaakstuk;
-    vector<pair<SchaakStuk*, pair<int, int>>> attac;
+    vector<pair<SchaakStuk*, pair<int, int>>> aanval;
     vector<pair<SchaakStuk*, pair<int, int>>> schaak;
     vector<pair<SchaakStuk*, pair<int, int>>> schaakmat;
     static pair<SchaakStuk *, pair<int, int>> getRandom(const vector<pair<SchaakStuk*, pair<int, int>>>* v) ;
