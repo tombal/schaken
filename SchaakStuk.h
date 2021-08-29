@@ -1,6 +1,5 @@
-//  Student:
+//  Student: Thibault Soumoy
 //  Rolnummer:
-//  Opmerkingen: (bvb aanpassingen van de opgave)
 //
 
 #ifndef SCHAKEN_SCHAAKSTUK_H
@@ -42,6 +41,9 @@ public:
     virtual bool isKing() const {
         return false;
     }
+    virtual bool isPion() const {
+        return false;
+    }
     virtual string toShortString() const = 0;
     bool passant = false;
     bool isNotUsed() const {
@@ -65,6 +67,7 @@ public:
     virtual string toString() const {
         return "Pion";
     }
+    bool isPion() const override {return true;}
     virtual string toShortString() const;
 
 };

@@ -32,18 +32,18 @@ public:
 
     void setPiece(int r, int k, SchaakStuk* s);
     bool containsPiece(int r, int k) const;
-    bool containsAnnemie(int r, int k,const SchaakStuk *s) const;
+    bool tegenstanderPositie(int r, int k, const SchaakStuk *s) const;
     bool deletePiece(int r, int k);
 
     pair<int,int> getkoningLocation(zw kleur) const;
     pair<pair<int, int>, pair<int,int>> AIplayer(zw kleur,bool bestMove = true);
-    possibleMoves getAttacPossitions(zw kleur, SchaakStuk* s);
+    possibleMoves getAanvalPosities(zw kleur, SchaakStuk* s);
     bool mogelijkSchaak(int r, int k, SchaakStuk *s, zw kleur);
     bool mogelijkSchaakMat(int r, int k, SchaakStuk *s, zw kleur);
 private:
     SchaakStuk* bord[8][8];
     void checkBijzondereRegels(pair<int, int> prevLocation, pair<int, int> newLocation, bool AIplayer = false);
-    void passand(pair<int, int> prevLocation, pair<int, int> newLocation);
+    void passant(pair<int, int> prevLocation, pair<int, int> newLocation);
     void rokade(pair<int, int> prevLocation, pair<int, int> newLocation);
     void promotie(pair<int, int> newLocation, bool AIplayer = false);
 };
