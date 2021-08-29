@@ -231,7 +231,7 @@ void Game::checkBijzondereRegels(pair<int, int> prevLocation, pair<int, int> new
 void Game::promotie(pair<int, int> newLocation, bool AIplayer) {
     /*
      * indien er een pion aan het einde van het bord (rij 0 of 8) geraakt zal de gebruiker een melding krijgen met welk schaakstuk dze vervangen mag worden
-     * Een pion zal nooit zijn eigen achterlijn behalen.
+     * Een pion zal nooit zijn eigen achterlijn behalen, dus kleur is niet van belang
      */
     SchaakStuk* pion = getPiece(newLocation.first, newLocation.second);
     zw kleur = getPiece(newLocation.first, newLocation.second)->getKleur();
@@ -242,15 +242,12 @@ void Game::promotie(pair<int, int> newLocation, bool AIplayer) {
         msgBox.setText(QMessageBox::tr("Kies een schaakstuk voor de pion die de overkant heeft bereikt:"));
 
         if(AIplayer){
-            delete getPiece(newLocation.first, newLocation.second);
             setPiece(newLocation.first, newLocation.second, new Koningin(kleur));
-            return;
         }else{
             QPushButton *toren = msgBox.addButton(QMessageBox::tr("Toren"), QMessageBox::ActionRole);
             QPushButton *paard = msgBox.addButton(QMessageBox::tr("Paard"), QMessageBox::ActionRole);
             QPushButton *loper = msgBox.addButton(QMessageBox::tr("Loper"), QMessageBox::ActionRole);
             QPushButton *koningin = msgBox.addButton(QMessageBox::tr("Koningin"), QMessageBox::ActionRole);
-
             msgBox.exec();
 
             if (msgBox.clickedButton() == toren) {
@@ -267,8 +264,8 @@ void Game::promotie(pair<int, int> newLocation, bool AIplayer) {
             }else{
                 setPiece(newLocation.first, newLocation.second, new Pion(kleur)); //fallback & geen keuze gemaakt
             }
-            delete getPiece(newLocation.first, newLocation.second);
         }
+        delete getPiece(newLocation.first, newLocation.second);
     }
 }
 
