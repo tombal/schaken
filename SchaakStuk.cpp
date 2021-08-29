@@ -1,5 +1,5 @@
 //  Student: Thibault Soumoy
-//  Rolnummer:
+//  Rolnummer: 0204602
 //
 
 #include "SchaakStuk.h"
@@ -26,8 +26,8 @@ vector<pair<int, int>> Pion::geldige_zetten(const Game* g) const{
     if(g->tegenstanderPositie(r + addOne, k - addOne, this) && (r + addOne <= 7 && r + addOne >= 0) && (k - addOne <= 7 && k - addOne >= 0)) zetten.emplace_back(r + addOne, k - addOne);
 
     //voor passant
-    if(g->getPiece(r, k  + addOne) != nullptr && g->tegenstanderPositie(r, k + addOne, this) && g->getPiece(r, k + addOne)->toShortString()[0] == 'P' && g->getPiece(r, k + addOne)->passant) zetten.emplace_back(r + addOne, k + addOne);//passant
-    if(g->getPiece(r, k  - addOne) != nullptr && g->tegenstanderPositie(r, k - addOne, this) && g->getPiece(r, k - addOne)->toShortString()[0] == 'P' && g->getPiece(r, k - addOne)->passant) zetten.emplace_back(r + addOne, k - addOne);//passant
+    if(g->getPiece(r, k  + addOne) != nullptr && g->tegenstanderPositie(r, k + addOne, this) && g->getPiece(r, k + addOne)->isPion() && g->getPiece(r, k + addOne)->passant) zetten.emplace_back(r + addOne, k + addOne);//passant
+    if(g->getPiece(r, k  - addOne) != nullptr && g->tegenstanderPositie(r, k - addOne, this) && g->getPiece(r, k - addOne)->isPion() && g->getPiece(r, k - addOne)->passant) zetten.emplace_back(r + addOne, k - addOne);//passant
 
     return zetten;
 }

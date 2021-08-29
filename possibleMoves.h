@@ -1,5 +1,5 @@
 //  Student: Thibault Soumoy
-//  Rolnummer:
+//  Rolnummer: 0204602
 
 #ifndef SCHAKEN_POSSIBLEMOVES_H
 #define SCHAKEN_POSSIBLEMOVES_H

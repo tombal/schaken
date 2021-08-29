@@ -1,5 +1,5 @@
 //  Student: Thibault Soumoy
-//  Rolnummer:
+//  Rolnummer: 0204602
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H

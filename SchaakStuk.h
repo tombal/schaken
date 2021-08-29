@@ -1,5 +1,5 @@
 //  Student: Thibault Soumoy
-//  Rolnummer:
+//  Rolnummer: 0204602
 //
 
 #ifndef SCHAKEN_SCHAAKSTUK_H
